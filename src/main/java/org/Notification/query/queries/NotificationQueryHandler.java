@@ -27,6 +27,10 @@ import org.Notification.query.queries.GetNotificationPreferenceQuery;
 import org.Notification.query.model.response.NotificationPreferenceResponse;
 import java.time.LocalDateTime;
 
+import org.Notification.query.queries.GetAdminNotificationsQuery;
+import org.Notification.command.data.NotificationChannel;
+import org.Notification.command.data.NotificationStatus;
+
 @Component
 public class NotificationQueryHandler {
 
@@ -35,6 +39,58 @@ public class NotificationQueryHandler {
 
     @Autowired
     private NotificationPreferenceRepository notificationPreferenceRepository;
+
+    @QueryHandler
+    @Transactional(readOnly = true)
+    public org.Notification.query.model.response.NotificationPageResponse handle(GetAdminNotificationsQuery query) {
+        Pageable pageable = PageRequest.of(query.getPage(), query.getSize());
+        
+        Specification<Notification> spec = Specification.where(null);
+
+        if (query.getReceiverId() != null && !query.getReceiverId().isBlank()) {
+            spec = spec.and((root, cq, cb) ->
+                    cb.equal(root.get("receiverId"), query.getReceiverId())
+            );
+        }
+
+        if (query.getIsRead() != null) {
+            spec = spec.and((root, cq, cb) ->
+                    cb.equal(root.get("isRead"), query.getIsRead())
+            );
+        }
+
+        if (query.getType() != null) {
+            spec = spec.and((root, cq, cb) ->
+                    cb.equal(root.get("type"), query.getType())
+            );
+        }
+
+        if (query.getStatus() != null) {
+            spec = spec.and((root, cq, cb) ->
+                    cb.equal(root.get("status"), query.getStatus())
+            );
+        }
+
+        if (query.getChannel() != null) {
+            spec = spec.and((root, cq, cb) ->
+                    cb.equal(root.get("channel"), query.getChannel())
+            );
+        }
+
+        Page<Notification> notificationPage = notificationRepository.findAll(spec, pageable);
+
+        List<NotificationResponse> content = notificationPage.getContent().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+
+        return new org.Notification.query.model.response.NotificationPageResponse(
+                content,
+                notificationPage.getNumber(),
+                notificationPage.getSize(),
+                notificationPage.getTotalElements(),
+                notificationPage.getTotalPages()
+        );
+    }
 
     @QueryHandler
     @Transactional

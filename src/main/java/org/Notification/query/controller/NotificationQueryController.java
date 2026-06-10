@@ -16,6 +16,10 @@ import org.Notification.query.queries.GetNotificationByIdQuery;
 import org.Notification.query.queries.GetUnreadNotificationCountQuery;
 import org.Notification.query.queries.GetNotificationPreferenceQuery;
 import org.Notification.query.model.response.NotificationPreferenceResponse;
+import org.Notification.query.queries.GetAdminNotificationsQuery;
+import org.Notification.command.data.NotificationChannel;
+import org.Notification.command.data.NotificationStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -79,6 +83,33 @@ public class NotificationQueryController {
         return queryGateway.query(
                 query,
                 ResponseTypes.instanceOf(NotificationResponse.class)
+        );
+    }
+
+    @GetMapping("/admin/notifications")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    public CompletableFuture<org.Notification.query.model.response.NotificationPageResponse> getAdminNotifications(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String receiverId,
+            @RequestParam(required = false) Boolean isRead,
+            @RequestParam(required = false) NotificationType type,
+            @RequestParam(required = false) NotificationStatus status,
+            @RequestParam(required = false) NotificationChannel channel
+    ) {
+        GetAdminNotificationsQuery query = GetAdminNotificationsQuery.builder()
+                .page(page)
+                .size(size)
+                .receiverId(receiverId)
+                .isRead(isRead)
+                .type(type)
+                .status(status)
+                .channel(channel)
+                .build();
+
+        return queryGateway.query(
+                query,
+                ResponseTypes.instanceOf(org.Notification.query.model.response.NotificationPageResponse.class)
         );
     }
 }
