@@ -25,6 +25,9 @@ public class NotificationInternalCommandController {
     @Autowired
     private org.Notification.command.service.MailService mailService;
 
+    @Autowired
+    private org.Notification.command.service.SmsService smsService;
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Notification createNotification(@Valid @RequestBody CreateNotificationRequest request) {
@@ -79,6 +82,40 @@ public class NotificationInternalCommandController {
                 .content(request.getBody())
                 .type(request.getType() != null ? request.getType() : org.Notification.command.data.NotificationType.SYSTEM)
                 .channel(org.Notification.command.data.NotificationChannel.EMAIL)
+                .status(NotificationStatus.SENT)
+                .isRead(false)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .sentAt(LocalDateTime.now())
+                .build();
+
+        return notificationRepository.save(notification);
+    }
+
+    @PostMapping("/sms")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Notification sendSmsNotification(@Valid @RequestBody org.Notification.command.model.request.SendSmsRequest request) {
+        // Kiểm tra tính hợp lệ của receiverId nếu có truyền lên
+        if (request.getReceiverId() != null && !request.getReceiverId().isBlank()) {
+            boolean userExists = userClient.checkUserExists(request.getReceiverId());
+            if (!userExists) {
+                throw new org.springframework.web.server.ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Người nhận thông báo không tồn tại trong hệ thống"
+                );
+            }
+        }
+
+        // Thực hiện gửi SMS (Mock/Log)
+        smsService.sendSms(request.getPhoneNumber(), request.getMessage());
+
+        // Lưu log thông báo vào database
+        Notification notification = Notification.builder()
+                .id(UUID.randomUUID().toString())
+                .receiverId(request.getReceiverId() != null ? request.getReceiverId() : "GUEST")
+                .title("SMS to " + request.getPhoneNumber())
+                .content(request.getMessage())
+                .type(request.getType() != null ? request.getType() : org.Notification.command.data.NotificationType.SYSTEM)
+                .channel(org.Notification.command.data.NotificationChannel.SMS)
                 .status(NotificationStatus.SENT)
                 .isRead(false)
                 .createdAt(LocalDateTime.now())
