@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.Notification.query.queries.GetNotificationByIdQuery;
 import org.Notification.query.queries.GetUnreadNotificationCountQuery;
+import org.Notification.query.queries.GetNotificationPreferenceQuery;
+import org.Notification.query.model.response.NotificationPreferenceResponse;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 

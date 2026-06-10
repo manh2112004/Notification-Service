@@ -21,11 +21,54 @@ import java.util.stream.Collectors;
 
 import org.Notification.query.queries.GetUnreadNotificationCountQuery;
 
+import org.Notification.command.data.NotificationPreference;
+import org.Notification.command.data.NotificationPreferenceRepository;
+import org.Notification.query.queries.GetNotificationPreferenceQuery;
+import org.Notification.query.model.response.NotificationPreferenceResponse;
+import java.time.LocalDateTime;
+
 @Component
 public class NotificationQueryHandler {
 
     @Autowired
     private NotificationRepository notificationRepository;
+
+    @Autowired
+    private NotificationPreferenceRepository notificationPreferenceRepository;
+
+    @QueryHandler
+    @Transactional
+    public NotificationPreferenceResponse handle(GetNotificationPreferenceQuery query) {
+        NotificationPreference preference = notificationPreferenceRepository.findByUserId(query.getUserId())
+                .orElseGet(() -> {
+                    NotificationPreference newPref = NotificationPreference.builder()
+                            .id(java.util.UUID.randomUUID().toString())
+                            .userId(query.getUserId())
+                            .emailEnabled(true)
+                            .inAppEnabled(true)
+                            .smsEnabled(false)
+                            .jobAlertEnabled(true)
+                            .applicationStatusEnabled(true)
+                            .systemEnabled(true)
+                            .createdAt(LocalDateTime.now())
+                            .updatedAt(LocalDateTime.now())
+                            .build();
+                    return notificationPreferenceRepository.save(newPref);
+                });
+
+        return NotificationPreferenceResponse.builder()
+                .id(preference.getId())
+                .userId(preference.getUserId())
+                .emailEnabled(preference.getEmailEnabled())
+                .inAppEnabled(preference.getInAppEnabled())
+                .smsEnabled(preference.getSmsEnabled())
+                .jobAlertEnabled(preference.getJobAlertEnabled())
+                .applicationStatusEnabled(preference.getApplicationStatusEnabled())
+                .systemEnabled(preference.getSystemEnabled())
+                .createdAt(preference.getCreatedAt())
+                .updatedAt(preference.getUpdatedAt())
+                .build();
+    }
 
     @QueryHandler
     @Transactional(readOnly = true)
