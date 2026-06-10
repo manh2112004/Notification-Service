@@ -5,6 +5,9 @@ import org.Notification.command.data.NotificationRepository;
 import org.Notification.query.model.response.NotificationResponse;
 import org.Notification.query.model.response.PageResponse;
 import org.springframework.data.jpa.domain.Specification;
+import org.Notification.query.queries.GetNotificationByIdQuery;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.axonframework.queryhandling.QueryHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,6 +24,19 @@ public class NotificationQueryHandler {
 
     @Autowired
     private NotificationRepository notificationRepository;
+
+    @QueryHandler
+    @Transactional(readOnly = true)
+    public NotificationResponse handle(GetNotificationByIdQuery query) {
+        Notification notification = notificationRepository.findById(query.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy thông báo"));
+
+        if (!notification.getReceiverId().equals(query.getReceiverId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền xem thông báo này");
+        }
+
+        return mapToResponse(notification);
+    }
 
     @QueryHandler
     @Transactional(readOnly = true)

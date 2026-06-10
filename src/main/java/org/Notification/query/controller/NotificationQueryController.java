@@ -11,6 +11,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.Notification.query.queries.GetNotificationByIdQuery;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,6 +46,22 @@ public class NotificationQueryController {
         return queryGateway.query(
                 query,
                 ResponseTypes.instanceOf(org.Notification.query.model.response.NotificationPageResponse.class)
+        );
+    }
+
+    @GetMapping("/{id}")
+    public CompletableFuture<NotificationResponse> getNotification(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable String id
+    ) {
+        GetNotificationByIdQuery query = GetNotificationByIdQuery.builder()
+                .id(id)
+                .receiverId(jwt.getSubject())
+                .build();
+
+        return queryGateway.query(
+                query,
+                ResponseTypes.instanceOf(NotificationResponse.class)
         );
     }
 }
