@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.Notification.query.queries.GetNotificationByIdQuery;
+import org.Notification.query.queries.GetUnreadNotificationCountQuery;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -46,6 +47,20 @@ public class NotificationQueryController {
         return queryGateway.query(
                 query,
                 ResponseTypes.instanceOf(org.Notification.query.model.response.NotificationPageResponse.class)
+        );
+    }
+
+    @GetMapping("/unread-count")
+    public CompletableFuture<Long> getUnreadCount(
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        GetUnreadNotificationCountQuery query = GetUnreadNotificationCountQuery.builder()
+                .receiverId(jwt.getSubject())
+                .build();
+
+        return queryGateway.query(
+                query,
+                ResponseTypes.instanceOf(Long.class)
         );
     }
 

@@ -19,11 +19,19 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.Notification.query.queries.GetUnreadNotificationCountQuery;
+
 @Component
 public class NotificationQueryHandler {
 
     @Autowired
     private NotificationRepository notificationRepository;
+
+    @QueryHandler
+    @Transactional(readOnly = true)
+    public Long handle(GetUnreadNotificationCountQuery query) {
+        return notificationRepository.countByReceiverIdAndIsRead(query.getReceiverId(), false);
+    }
 
     @QueryHandler
     @Transactional(readOnly = true)
