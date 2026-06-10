@@ -48,4 +48,20 @@ public class NotificationCommandController {
         
         notificationRepository.save(notification);
     }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteNotification(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable String id
+    ) {
+        Notification notification = notificationRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy thông báo"));
+
+        if (!notification.getReceiverId().equals(jwt.getSubject())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền thực hiện hành động này");
+        }
+
+        notificationRepository.delete(notification);
+    }
 }
