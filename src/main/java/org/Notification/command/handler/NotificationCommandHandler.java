@@ -2,6 +2,7 @@ package org.Notification.command.handler;
 
 import org.Notification.client.UserClient;
 import org.Notification.command.command.CreateAdminNotificationCommand;
+import org.Notification.command.command.BroadcastAdminNotificationCommand;
 import org.Notification.command.data.Notification;
 import org.Notification.command.data.NotificationRepository;
 import org.Notification.command.data.NotificationStatus;
@@ -40,6 +41,32 @@ public class NotificationCommandHandler {
         List<Notification> createdNotifications = new ArrayList<>();
 
         for (String receiverId : command.getReceiverIds()) {
+            Notification notification = Notification.builder()
+                    .id(UUID.randomUUID().toString())
+                    .receiverId(receiverId)
+                    .title(command.getTitle())
+                    .content(command.getContent())
+                    .type(command.getType())
+                    .channel(command.getChannel())
+                    .status(NotificationStatus.SENT)
+                    .isRead(false)
+                    .createdAt(LocalDateTime.now())
+                    .updatedAt(LocalDateTime.now())
+                    .sentAt(LocalDateTime.now())
+                    .build();
+
+            createdNotifications.add(notificationRepository.save(notification));
+        }
+
+        return createdNotifications;
+    }
+
+    @CommandHandler
+    public List<Notification> handle(BroadcastAdminNotificationCommand command) {
+        List<String> allUserIds = userClient.getAllUserIds(command.getToken());
+        List<Notification> createdNotifications = new ArrayList<>();
+
+        for (String receiverId : allUserIds) {
             Notification notification = Notification.builder()
                     .id(UUID.randomUUID().toString())
                     .receiverId(receiverId)

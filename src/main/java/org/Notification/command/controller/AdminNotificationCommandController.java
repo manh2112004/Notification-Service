@@ -10,6 +10,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import org.Notification.command.command.BroadcastAdminNotificationCommand;
+import org.Notification.command.model.request.AdminBroadcastNotificationRequest;
+
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -30,6 +36,24 @@ public class AdminNotificationCommandController {
                 .content(request.getContent())
                 .type(request.getType())
                 .channel(request.getChannel())
+                .build();
+
+        return commandGateway.send(command);
+    }
+
+    @PostMapping("/broadcast")
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    public CompletableFuture<List<Notification>> broadcastAdminNotification(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody AdminBroadcastNotificationRequest request
+    ) {
+        BroadcastAdminNotificationCommand command = BroadcastAdminNotificationCommand.builder()
+                .title(request.getTitle())
+                .content(request.getContent())
+                .type(request.getType())
+                .channel(request.getChannel())
+                .token(jwt.getTokenValue())
                 .build();
 
         return commandGateway.send(command);
