@@ -147,6 +147,15 @@ public class NotificationQueryHandler {
 
     @QueryHandler
     @Transactional(readOnly = true)
+    public NotificationResponse handle(GetAdminNotificationByIdQuery query) {
+        Notification notification = notificationRepository.findById(query.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy thông báo"));
+
+        return mapToResponse(notification);
+    }
+
+    @QueryHandler
+    @Transactional(readOnly = true)
     public org.Notification.query.model.response.NotificationPageResponse handle(GetNotificationsQuery query) {
         Pageable pageable = PageRequest.of(query.getPage(), query.getSize());
         
