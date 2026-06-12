@@ -3,12 +3,14 @@ package org.Notification.command.controller;
 import jakarta.validation.Valid;
 import org.Notification.command.command.CreateAdminNotificationCommand;
 import org.Notification.command.data.Notification;
+import org.Notification.command.data.NotificationRepository;
 import org.Notification.command.model.request.AdminCreateNotificationRequest;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import org.Notification.command.command.BroadcastAdminNotificationCommand;
 import org.Notification.command.model.request.AdminBroadcastNotificationRequest;
@@ -25,6 +27,9 @@ public class AdminNotificationCommandController {
 
     @Autowired
     private CommandGateway commandGateway;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -57,5 +62,15 @@ public class AdminNotificationCommandController {
                 .build();
 
         return commandGateway.send(command);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    public void deleteAdminNotification(@PathVariable String id) {
+        Notification notification = notificationRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy thông báo"));
+
+        notificationRepository.delete(notification);
     }
 }
