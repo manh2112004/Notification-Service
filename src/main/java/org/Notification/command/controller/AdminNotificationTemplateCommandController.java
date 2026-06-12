@@ -3,6 +3,7 @@ package org.Notification.command.controller;
 import jakarta.validation.Valid;
 import org.Notification.command.data.NotificationTemplate;
 import org.Notification.command.model.request.CreateNotificationTemplateRequest;
+import org.Notification.command.model.request.UpdateNotificationTemplateRequest;
 import org.Notification.command.service.NotificationTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,5 +24,14 @@ public class AdminNotificationTemplateCommandController {
     @PreAuthorize("hasRole('SYSTEM_ADMIN')")
     public CompletableFuture<NotificationTemplate> createTemplate(@Valid @RequestBody CreateNotificationTemplateRequest request) {
         return notificationTemplateService.createTemplate(request);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    public CompletableFuture<NotificationTemplate> updateTemplate(
+            @PathVariable String id,
+            @Valid @RequestBody UpdateNotificationTemplateRequest request
+    ) {
+        return notificationTemplateService.updateTemplate(id, request);
     }
 }

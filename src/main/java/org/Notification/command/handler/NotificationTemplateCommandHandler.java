@@ -1,6 +1,7 @@
 package org.Notification.command.handler;
 
 import org.Notification.command.command.CreateNotificationTemplateCommand;
+import org.Notification.command.command.UpdateNotificationTemplateCommand;
 import org.Notification.command.data.NotificationTemplate;
 import org.Notification.command.data.NotificationTemplateRepository;
 import org.axonframework.commandhandling.CommandHandler;
@@ -36,6 +37,30 @@ public class NotificationTemplateCommandHandler {
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
+
+        return notificationTemplateRepository.save(template);
+    }
+
+    @CommandHandler
+    public NotificationTemplate handle(UpdateNotificationTemplateCommand command) {
+        NotificationTemplate template = notificationTemplateRepository.findById(command.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy template"));
+
+        // Check if templateCode is updated and already in use by another template
+        if (!template.getTemplateCode().equals(command.getTemplateCode())) {
+            if (notificationTemplateRepository.existsByTemplateCode(command.getTemplateCode())) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT, "Template code '" + command.getTemplateCode() + "' đã tồn tại"
+                );
+            }
+        }
+
+        template.setTemplateCode(command.getTemplateCode());
+        template.setTitleTemplate(command.getTitleTemplate());
+        template.setContentTemplate(command.getContentTemplate());
+        template.setType(command.getType());
+        template.setIsActive(command.getIsActive());
+        template.setUpdatedAt(LocalDateTime.now());
 
         return notificationTemplateRepository.save(template);
     }

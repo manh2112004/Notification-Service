@@ -1,8 +1,10 @@
 package org.Notification.command.service.impl;
 
 import org.Notification.command.command.CreateNotificationTemplateCommand;
+import org.Notification.command.command.UpdateNotificationTemplateCommand;
 import org.Notification.command.data.NotificationTemplate;
 import org.Notification.command.model.request.CreateNotificationTemplateRequest;
+import org.Notification.command.model.request.UpdateNotificationTemplateRequest;
 import org.Notification.command.service.NotificationTemplateService;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,20 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
     @Override
     public CompletableFuture<NotificationTemplate> createTemplate(CreateNotificationTemplateRequest request) {
         CreateNotificationTemplateCommand command = CreateNotificationTemplateCommand.builder()
+                .templateCode(request.getTemplateCode())
+                .titleTemplate(request.getTitleTemplate())
+                .contentTemplate(request.getContentTemplate())
+                .type(request.getType())
+                .isActive(request.getIsActive())
+                .build();
+
+        return commandGateway.send(command);
+    }
+
+    @Override
+    public CompletableFuture<NotificationTemplate> updateTemplate(String id, UpdateNotificationTemplateRequest request) {
+        UpdateNotificationTemplateCommand command = UpdateNotificationTemplateCommand.builder()
+                .id(id)
                 .templateCode(request.getTemplateCode())
                 .titleTemplate(request.getTitleTemplate())
                 .contentTemplate(request.getContentTemplate())
