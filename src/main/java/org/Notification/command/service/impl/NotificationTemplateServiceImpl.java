@@ -1,6 +1,7 @@
 package org.Notification.command.service.impl;
 
 import org.Notification.command.command.CreateNotificationTemplateCommand;
+import org.Notification.command.command.DeleteNotificationTemplateCommand;
 import org.Notification.command.command.UpdateNotificationTemplateCommand;
 import org.Notification.command.data.NotificationTemplate;
 import org.Notification.command.model.request.CreateNotificationTemplateRequest;
@@ -40,6 +41,15 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
                 .contentTemplate(request.getContentTemplate())
                 .type(request.getType())
                 .isActive(request.getIsActive())
+                .build();
+
+        return commandGateway.send(command);
+    }
+
+    @Override
+    public CompletableFuture<Void> deleteTemplate(String id) {
+        DeleteNotificationTemplateCommand command = DeleteNotificationTemplateCommand.builder()
+                .id(id)
                 .build();
 
         return commandGateway.send(command);

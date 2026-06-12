@@ -34,4 +34,11 @@ public class AdminNotificationTemplateCommandController {
     ) {
         return notificationTemplateService.updateTemplate(id, request);
     }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    public CompletableFuture<Void> deleteTemplate(@PathVariable String id) {
+        return notificationTemplateService.deleteTemplate(id);
+    }
 }

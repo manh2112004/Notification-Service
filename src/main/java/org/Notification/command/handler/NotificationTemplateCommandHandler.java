@@ -1,6 +1,7 @@
 package org.Notification.command.handler;
 
 import org.Notification.command.command.CreateNotificationTemplateCommand;
+import org.Notification.command.command.DeleteNotificationTemplateCommand;
 import org.Notification.command.command.UpdateNotificationTemplateCommand;
 import org.Notification.command.data.NotificationTemplate;
 import org.Notification.command.data.NotificationTemplateRepository;
@@ -47,21 +48,43 @@ public class NotificationTemplateCommandHandler {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy template"));
 
         // Check if templateCode is updated and already in use by another template
-        if (!template.getTemplateCode().equals(command.getTemplateCode())) {
-            if (notificationTemplateRepository.existsByTemplateCode(command.getTemplateCode())) {
-                throw new ResponseStatusException(
-                        HttpStatus.CONFLICT, "Template code '" + command.getTemplateCode() + "' đã tồn tại"
-                );
+        if (command.getTemplateCode() != null && !command.getTemplateCode().isBlank()) {
+            if (!template.getTemplateCode().equals(command.getTemplateCode())) {
+                if (notificationTemplateRepository.existsByTemplateCode(command.getTemplateCode())) {
+                    throw new ResponseStatusException(
+                            HttpStatus.CONFLICT, "Template code '" + command.getTemplateCode() + "' đã tồn tại"
+                    );
+                }
             }
+            template.setTemplateCode(command.getTemplateCode());
         }
 
-        template.setTemplateCode(command.getTemplateCode());
-        template.setTitleTemplate(command.getTitleTemplate());
-        template.setContentTemplate(command.getContentTemplate());
-        template.setType(command.getType());
-        template.setIsActive(command.getIsActive());
+        if (command.getTitleTemplate() != null && !command.getTitleTemplate().isBlank()) {
+            template.setTitleTemplate(command.getTitleTemplate());
+        }
+
+        if (command.getContentTemplate() != null && !command.getContentTemplate().isBlank()) {
+            template.setContentTemplate(command.getContentTemplate());
+        }
+
+        if (command.getType() != null) {
+            template.setType(command.getType());
+        }
+
+        if (command.getIsActive() != null) {
+            template.setIsActive(command.getIsActive());
+        }
+
         template.setUpdatedAt(LocalDateTime.now());
 
         return notificationTemplateRepository.save(template);
+    }
+
+    @CommandHandler
+    public void handle(DeleteNotificationTemplateCommand command) {
+        NotificationTemplate template = notificationTemplateRepository.findById(command.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy template"));
+
+        notificationTemplateRepository.delete(template);
     }
 }

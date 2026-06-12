@@ -9,4 +9,5 @@ import java.util.concurrent.CompletableFuture;
 public interface NotificationTemplateService {
     CompletableFuture<NotificationTemplate> createTemplate(CreateNotificationTemplateRequest request);
     CompletableFuture<NotificationTemplate> updateTemplate(String id, UpdateNotificationTemplateRequest request);
+    CompletableFuture<Void> deleteTemplate(String id);
 }
