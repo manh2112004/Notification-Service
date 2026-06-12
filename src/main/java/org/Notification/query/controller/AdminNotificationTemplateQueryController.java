@@ -1,5 +1,6 @@
 package org.Notification.query.controller;
 
+import org.Notification.command.data.NotificationTemplate;
 import org.Notification.command.data.NotificationType;
 import org.Notification.query.model.response.NotificationTemplatePageResponse;
 import org.Notification.query.service.NotificationTemplateQueryService;
@@ -26,5 +27,11 @@ public class AdminNotificationTemplateQueryController {
             @RequestParam(required = false) Boolean isActive
     ) {
         return notificationTemplateQueryService.getTemplates(page, size, templateCode, type, isActive);
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    public CompletableFuture<NotificationTemplate> getTemplateById(@PathVariable String id) {
+        return notificationTemplateQueryService.getTemplateById(id);
     }
 }

@@ -9,8 +9,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Component
 public class NotificationTemplateQueryHandler {
@@ -52,5 +54,12 @@ public class NotificationTemplateQueryHandler {
                 page.getTotalElements(),
                 page.getTotalPages()
         );
+    }
+
+    @QueryHandler
+    @Transactional(readOnly = true)
+    public NotificationTemplate handle(GetNotificationTemplateByIdQuery query) {
+        return notificationTemplateRepository.findById(query.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy template"));
     }
 }
