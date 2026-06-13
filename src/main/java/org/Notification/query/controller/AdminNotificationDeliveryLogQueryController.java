@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.Notification.query.model.response.NotificationDeliveryLogResponse;
+import org.springframework.web.bind.annotation.PathVariable;
+
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -30,5 +33,11 @@ public class AdminNotificationDeliveryLogQueryController {
             @RequestParam(required = false) NotificationChannel channel
     ) {
         return notificationDeliveryLogQueryService.getDeliveryLogs(page, size, notificationId, status, channel);
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    public CompletableFuture<NotificationDeliveryLogResponse> getDeliveryLogById(@PathVariable String id) {
+        return notificationDeliveryLogQueryService.getDeliveryLogById(id);
     }
 }

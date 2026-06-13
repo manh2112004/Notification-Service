@@ -35,4 +35,16 @@ public class NotificationDeliveryLogQueryServiceImpl implements NotificationDeli
                 ResponseTypes.instanceOf(NotificationDeliveryLogPageResponse.class)
         );
     }
+
+    @Override
+    public CompletableFuture<org.Notification.query.model.response.NotificationDeliveryLogResponse> getDeliveryLogById(String id) {
+        org.Notification.query.queries.GetAdminDeliveryLogByIdQuery query = org.Notification.query.queries.GetAdminDeliveryLogByIdQuery.builder()
+                .id(id)
+                .build();
+
+        return queryGateway.query(
+                query,
+                ResponseTypes.instanceOf(org.Notification.query.model.response.NotificationDeliveryLogResponse.class)
+        );
+    }
 }

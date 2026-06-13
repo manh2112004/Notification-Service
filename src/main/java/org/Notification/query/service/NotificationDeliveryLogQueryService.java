@@ -10,4 +10,6 @@ public interface NotificationDeliveryLogQueryService {
     CompletableFuture<NotificationDeliveryLogPageResponse> getDeliveryLogs(
             int page, int size, String notificationId, DeliveryStatus status, NotificationChannel channel
     );
+
+    CompletableFuture<org.Notification.query.model.response.NotificationDeliveryLogResponse> getDeliveryLogById(String id);
 }

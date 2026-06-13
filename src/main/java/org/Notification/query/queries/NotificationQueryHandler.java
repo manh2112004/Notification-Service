@@ -35,6 +35,7 @@ import org.Notification.command.data.NotificationDeliveryLog;
 import org.Notification.command.data.NotificationDeliveryLogRepository;
 import org.Notification.query.model.response.NotificationDeliveryLogResponse;
 import org.Notification.query.model.response.NotificationDeliveryLogPageResponse;
+import org.Notification.query.queries.GetAdminDeliveryLogByIdQuery;
 
 @Component
 public class NotificationQueryHandler {
@@ -209,6 +210,25 @@ public class NotificationQueryHandler {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy thông báo"));
 
         return mapToResponse(notification);
+    }
+
+    @QueryHandler
+    @Transactional(readOnly = true)
+    public NotificationDeliveryLogResponse handle(GetAdminDeliveryLogByIdQuery query) {
+        NotificationDeliveryLog log = notificationDeliveryLogRepository.findById(query.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy nhật ký gửi thông báo"));
+
+        return NotificationDeliveryLogResponse.builder()
+                .id(log.getId())
+                .notificationId(log.getNotificationId())
+                .channel(log.getChannel())
+                .status(log.getStatus())
+                .provider(log.getProvider())
+                .errorMessage(log.getErrorMessage())
+                .retryCount(log.getRetryCount())
+                .sentAt(log.getSentAt())
+                .createdAt(log.getCreatedAt())
+                .build();
     }
 
     @QueryHandler
