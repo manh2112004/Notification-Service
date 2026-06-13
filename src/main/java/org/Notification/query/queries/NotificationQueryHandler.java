@@ -31,6 +31,11 @@ import org.Notification.query.queries.GetAdminNotificationsQuery;
 import org.Notification.command.data.NotificationChannel;
 import org.Notification.command.data.NotificationStatus;
 
+import org.Notification.command.data.NotificationDeliveryLog;
+import org.Notification.command.data.NotificationDeliveryLogRepository;
+import org.Notification.query.model.response.NotificationDeliveryLogResponse;
+import org.Notification.query.model.response.NotificationDeliveryLogPageResponse;
+
 @Component
 public class NotificationQueryHandler {
 
@@ -39,6 +44,58 @@ public class NotificationQueryHandler {
 
     @Autowired
     private NotificationPreferenceRepository notificationPreferenceRepository;
+
+    @Autowired
+    private NotificationDeliveryLogRepository notificationDeliveryLogRepository;
+
+    @QueryHandler
+    @Transactional(readOnly = true)
+    public NotificationDeliveryLogPageResponse handle(GetAdminDeliveryLogsQuery query) {
+        Pageable pageable = PageRequest.of(query.getPage(), query.getSize());
+        Specification<NotificationDeliveryLog> spec = Specification.where(null);
+
+        if (query.getNotificationId() != null && !query.getNotificationId().isBlank()) {
+            spec = spec.and((root, cq, cb) ->
+                    cb.equal(root.get("notificationId"), query.getNotificationId())
+            );
+        }
+
+        if (query.getStatus() != null) {
+            spec = spec.and((root, cq, cb) ->
+                    cb.equal(root.get("status"), query.getStatus())
+            );
+        }
+
+        if (query.getChannel() != null) {
+            spec = spec.and((root, cq, cb) ->
+                    cb.equal(root.get("channel"), query.getChannel())
+            );
+        }
+
+        Page<NotificationDeliveryLog> logPage = notificationDeliveryLogRepository.findAll(spec, pageable);
+
+        List<NotificationDeliveryLogResponse> content = logPage.getContent().stream()
+                .map(log -> NotificationDeliveryLogResponse.builder()
+                        .id(log.getId())
+                        .notificationId(log.getNotificationId())
+                        .channel(log.getChannel())
+                        .status(log.getStatus())
+                        .provider(log.getProvider())
+                        .errorMessage(log.getErrorMessage())
+                        .retryCount(log.getRetryCount())
+                        .sentAt(log.getSentAt())
+                        .createdAt(log.getCreatedAt())
+                        .build())
+                .collect(Collectors.toList());
+
+        return new NotificationDeliveryLogPageResponse(
+                content,
+                logPage.getNumber(),
+                logPage.getSize(),
+                logPage.getTotalElements(),
+                logPage.getTotalPages()
+        );
+    }
 
     @QueryHandler
     @Transactional(readOnly = true)
