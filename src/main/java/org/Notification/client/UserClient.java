@@ -71,4 +71,38 @@ public class UserClient {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Không thể lấy danh sách người dùng hoạt động từ User Service");
         }
     }
+
+    public String getUserEmail(String userId, String token) {
+        String url = "http://user-service/api/v1/admin/users/" + userId;
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            if (token != null && !token.isBlank()) {
+                headers.setBearerAuth(token);
+            }
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+            ResponseEntity<java.util.Map> responseEntity = restTemplate.exchange(url, HttpMethod.GET, entity, java.util.Map.class);
+            java.util.Map response = responseEntity.getBody();
+            if (response != null && response.containsKey("email")) {
+                return (String) response.get("email");
+            }
+            return null;
+        } catch (Exception e) {
+            log.error("Error calling User Service to get user email: userId={}", userId, e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Không thể lấy email người dùng từ User Service");
+        }
+    }
+
+    public String getUserPhoneNumber(String userId) {
+        String url = "http://profile-service/api/v1/profiles/public/user/" + userId;
+        try {
+            java.util.Map response = restTemplate.getForObject(url, java.util.Map.class);
+            if (response != null && response.containsKey("phoneNumber")) {
+                return (String) response.get("phoneNumber");
+            }
+            return null;
+        } catch (Exception e) {
+            log.error("Error calling Profile Service to get phone number: userId={}", userId, e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Không thể lấy số điện thoại từ Profile Service");
+        }
+    }
 }
